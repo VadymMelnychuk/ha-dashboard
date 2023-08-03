@@ -1,0 +1,217 @@
+square: false
+type: grid
+cards:
+  - type: markdown
+    content: '## System'
+  - type: custom:button-card
+    entity: sensor.processor_temperature
+    icon: mdi:raspberry-pi
+    entity_picture: /local/images/RasPi4ModelB.svg
+    show_entity_picture: true
+    name: ' '
+    styles:
+      grid:
+        - grid-template-areas: >-
+            "i i temp_name temp" "i i cpu_name cpu" "i i ram_name ram" "i i
+            sd_name sd" "n n n restart"
+        - grid-template-columns: 1fr 1fr min-content 1fr
+        - grid-template-rows: >-
+            min-content min-content min-content min-content min-content
+            min-content
+      name:
+        - font-weight: bold
+        - font-size: 13px
+        - color: black
+        - align-self: middle
+        - justify-self: start
+        - padding-bottom: 4px
+      img_cell:
+        - justify-content: start
+        - align-items: start
+        - margin: none
+      icon:
+        - color: |
+            [[[
+              if (entity.state < 60) return '#009900';
+              if (entity.state >= 60 && entity.state < 80) return 'orange';
+              else return 'red';
+            ]]]
+        - width: 80%
+      custom_fields:
+        temp_name:
+          - align-self: middle
+          - justify-self: start
+        cpu_name:
+          - align-self: middle
+          - justify-self: start
+        ram_name:
+          - align-self: middle
+          - justify-self: start
+        sd_name:
+          - align-self: middle
+          - justify-self: start
+        temp:
+          - padding-left: 5px
+          - align-self: middle
+          - justify-self: start
+        cpu:
+          - padding-left: 5px
+          - align-self: middle
+          - justify-self: start
+          - '--text-color-sensor': >-
+              [[[ if (states["sensor.processor_use"].state > 80) return "red";
+              ]]]
+        ram:
+          - padding-left: 5px
+          - align-self: middle
+          - justify-self: start
+          - '--text-color-sensor': >-
+              [[[ if (states["sensor.memory_use_percent"].state > 80) return
+              "red"; ]]]
+        sd:
+          - padding-left: 5px
+          - align-self: middle
+          - justify-self: start
+          - '--text-color-sensor': >-
+              [[[ if (states["sensor.disk_use_percent_config"].state > 80)
+              return "red"; ]]]
+        restart:
+          - padding-top: 10px
+          - padding-right: 10px
+          - align-self: bottom
+          - justify-self: end
+    custom_fields:
+      temp_name: |
+        [[[ 
+          return `<ha-icon
+                icon="mdi:thermometer"
+                style="width: 24px; height: 24px; color: green;">
+            </ha-icon>
+            <span>Temp:</span>` 
+        ]]]
+      cpu_name: |
+        [[[ 
+          return `<ha-icon
+                icon="mdi:cpu-64-bit"
+                style="width: 24px; height: 24px; color: deepskyblue;">
+            </ha-icon>
+            <span>CPU:</span>` 
+        ]]]
+      ram_name: |
+        [[[ 
+          return `<ha-icon
+              icon="mdi:memory"
+              style="width: 24px; height: 24px; color: deepskyblue;">
+            </ha-icon>
+            <span>RAM:</span>` 
+        ]]]
+      sd_name: |
+        [[[ 
+          return `<ha-icon
+              icon="mdi:harddisk"
+              style="width: 24px; height: 24px; color: deepskyblue;">
+            </ha-icon>
+            <span>SD:</span>` 
+        ]]]
+      temp: |
+        [[[
+          return `<span>${entity.state}°C</span>`
+        ]]]
+      cpu:
+        card:
+          type: custom:button-card
+          entity: sensor.disk_use_percent_config
+          show_icon: false
+          name: |
+            [[[
+              return `${states['sensor.disk_use_percent_config'].state} %`
+            ]]]
+          styles:
+            card:
+              - border: |
+                  [[[
+                     return '0px'
+                  ]]]
+      ram:
+        card:
+          type: custom:button-card
+          entity: sensor.memory_use_percent
+          show_icon: false
+          name: |
+            [[[
+              return `<span style="color: var(--text-color-sensor);">${states['sensor.memory_use_percent'].state}%</span>`
+            ]]]
+          styles:
+            card:
+              - border: |
+                  [[[
+                     return '0px'
+                  ]]]  
+      sd:
+        card:
+          type: custom:button-card
+          entity: sensor.disk_use_percent_config
+          show_icon: false
+          name: |
+            [[[
+              return `<span style="color: var(--text-color-sensor);">${states['sensor.disk_use_percent_config'].state}%</span>`
+            ]]]
+          styles:
+            card:
+              - border: |
+                  [[[
+                     return '0px'
+                  ]]]  
+      restart:
+        card:
+          type: custom:button-card
+          icon: mdi:power
+          tooltip: Restart
+          styles:
+            icon:
+              - width: 80%
+            card:
+              - '-webkit-box-shadow': 0px 0px 9px 0px var(--button-card-light-color)
+              - width: 40px
+              - height: 40px
+          tap_action:
+            entity: input_button.restart
+            action: call-service
+            service: homeassistant.restart
+  - type: entities
+    title: Currency Rates
+    entities:
+      - entity: sensor.usd_nbu
+        unit: false
+        type: custom:multiple-entity-row
+        column: true
+        styles:
+          font-size: 10px
+        entities:
+          - entity: sensor.usd_market
+            name: false
+      - entity: sensor.eur_nbu
+        unit: false
+        type: custom:multiple-entity-row
+        column: true
+        styles:
+          font-size: 10px
+        entities:
+          - entity: sensor.eur_market
+            name: false
+  - type: entities
+    entities:
+      - entity: sensor.dkng
+    title: Shares
+  - type: gauge
+    entity: sensor.rt_ax88u_7658_kib_s_received
+    name: Download speed
+    unit: KiB/s
+    min: 0
+    max: 1000000
+    needle: false
+    severity:
+      green: 0
+      yellow: 200000
+      red: 500000
+columns: 1

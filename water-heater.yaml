@@ -1,0 +1,247 @@
+square: false
+type: grid
+cards:
+  - type: custom:button-card
+    entity: sensor.water_heater_temperature
+    name: Temperature
+    styles:
+      icon:
+        - padding-bottom: 20px
+        - color: |
+            [[[
+              const target = states['sensor.water_heater_target_temperature'].state;
+              const perc = (entity.state / target) * 100;
+              if (perc >= 90)
+                return '#ff0000';
+              if (perc >= 80)
+                return '#ff8800';
+              if (perc >= 70)
+                return '#ffff00';
+              if (perc >= 60)
+                return '#88ff00';
+              if (perc >= 50)
+                return '#00ff00';
+              if (perc >= 40)
+                return '#00ff88';
+              if (perc >= 30)
+                return '#00ffff';
+              if (perc >= 20)
+                return '#0088ff';
+              if (perc >= 10)
+                return '#0000ff';
+            ]]]
+        - height: 40px
+        - width: 40px
+      name:
+        - font-size: 17px
+        - color: gray
+        - padding-top: 5px
+        - padding-left: 15px
+        - justify-self: left
+        - align-self: stretch
+      grid:
+        - grid-template-areas: >-
+            "head head head head" "n n n i" "temp temp temp1 temp1" "temp temp
+            temp2 temp2" "target_name target_name target_name target_name"
+            "target target target power" "max eco bps nn"
+        - grid-template-columns: 1fr 1fr 1fr 1fr
+        - grid-template-rows: >-
+            min-content min-content min-content min-content min-content
+            min-content min-content
+      custom_fields:
+        head:
+          - justify-self: start
+          - font-size: 28px
+          - font-weight: bolder
+          - padding-left: 15px
+        temp:
+          - padding-left: 15px
+          - align-self: middle
+          - justify-self: start
+          - font-size: 28px
+        temp1:
+          - padding-left: 90px
+          - align-self: middle
+          - justify-self: middle
+          - font-size: 14px
+        temp2:
+          - padding-left: 90px
+          - align-self: middle
+          - justify-self: middle
+          - font-size: 14px
+        target_name:
+          - padding-top: 20px
+          - padding-left: 15px
+          - justify-self: left
+        power:
+          - padding-top: 15px
+          - padding-right: 20px
+          - justify-self: right
+        max:
+          - height: 80px
+          - width: 80px
+        eco:
+          - height: 80px
+          - width: 80px
+        bps:
+          - height: 80px
+          - width: 80px
+    custom_fields:
+      head: Water Heater
+      temp: |
+        [[[
+          return `<span>${entity.state}<span style='font-size: 18px; color: gray'> °C</span></span>`
+        ]]]
+      temp1: |
+        [[[
+          return `<span style='font-size: 12px;'>Temp 1:</span> ` + 
+            `<span style='font-weight: bold'>` + 
+            `${states['sensor.water_heater_temperature_2'].state}` + 
+            `<span style='font-size: 10px; color: gray'> °C</span></span>`
+        ]]]
+      temp2: |
+        [[[
+          return `<span style='font-size: 12px;'>Temp 2:</span> ` +
+            `<span style='font-weight: bold'>` + 
+            `${states['sensor.water_heater_temperature_3'].state}` + 
+            `<span style='font-size: 10px; color: gray'> °C</span></span>`
+        ]]]
+      target_name: Target Temperature
+      target:
+        card:
+          type: custom:slider-entity-row
+          entity: number.water_heater_target_temperature
+          min: 35
+          max: 75
+          step: 5
+          full_row: true
+      power:
+        card:
+          type: custom:button-card
+          entity: switch.water_heater_power
+          show_name: false
+          icon: mdi:power
+          styles:
+            icon:
+              - width: 80%
+            card:
+              - '-webkit-box-shadow': 0px 0px 9px 0px var(--button-card-light-color)
+              - width: 30px
+              - height: 30px
+      max:
+        card:
+          type: custom:button-card
+          entity: select.water_heater_mode
+          show_name: true
+          color_type: icon
+          color: gray
+          icon: mdi:fire
+          icon_height: 35px
+          name: Max
+          state:
+            - value: max
+              color: red
+              styles:
+                card:
+                  - '-webkit-box-shadow': inset 0px 0px 5px 0px var(--button-card-light-color)
+          tap_action:
+            action: |
+              [[[ 
+                if (states['switch.water_heater_power'].state == 'off')
+                  return 'none'
+          styles:
+            card:
+              - border-radius: 50%
+              - margin-top: 10%
+              - margin-left: 25%
+          card_mod:
+            style: |
+              {% if is_state('switch.water_heater_power', 'off') %}
+              ha-card {
+                color: var(--disabled-text-color);
+                --ha-card-background: var(--mdc-text-field-fill-color);
+                }
+              {% endif %}
+      eco:
+        card:
+          type: custom:button-card
+          entity: select.water_heater_mode
+          show_name: true
+          color_type: icon
+          color: gray
+          icon: mdi:leaf
+          icon_height: 35px
+          name: Eco
+          state:
+            - value: eco
+              color: green
+              styles:
+                card:
+                  - '-webkit-box-shadow': inset 0px 0px 5px 0px var(--button-card-light-color)
+          tap_action:
+            action: |
+              [[[ 
+                if (states['switch.water_heater_power'].state == 'off')
+                  return 'none'
+                else
+                  return 'call-service'
+              ]]]
+            service: select.select_option
+            data:
+              entity_id: select.water_heater_mode
+              option: eco
+          card_mod:
+            style: |
+              {% if is_state('switch.water_heater_power', 'off') %}
+              ha-card {
+                color: var(--disabled-text-color);
+                --ha-card-background: var(--mdc-text-field-fill-color);
+                }
+              {% endif %}
+          styles:
+            card:
+              - border-radius: 50%
+              - margin-top: 10%
+              - margin-left: 25%
+      bps:
+        card:
+          type: custom:button-card
+          entity: select.water_heater_mode
+          show_name: true
+          color_type: icon
+          color: gray
+          icon: mdi:hospital-box
+          icon_height: 35px
+          name: BPS
+          state:
+            - value: bps
+              color: blue
+              styles:
+                card:
+                  - '-webkit-box-shadow': inset 0px 0px 5px 0px var(--button-card-light-color)
+          tap_action:
+            action: |
+              [[[ 
+                if (states['switch.water_heater_power'].state == 'off')
+                  return 'none'
+                else
+                  return 'call-service'
+              ]]]
+            service: select.select_option
+            data:
+              entity_id: select.water_heater_mode
+              option: bps
+          card_mod:
+            style: |
+              {% if is_state('switch.water_heater_power', 'off') %}
+              ha-card {
+                color: var(--disabled-text-color);
+                --ha-card-background: var(--mdc-text-field-fill-color);
+                }
+              {% endif %}
+          styles:
+            card:
+              - border-radius: 50%
+              - margin-top: 10%
+              - margin-left: 25%
+columns: 1
