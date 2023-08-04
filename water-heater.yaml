@@ -4,6 +4,27 @@ cards:
   - type: custom:button-card
     entity: sensor.water_heater_temperature
     name: Temperature
+    variables:
+      mode_size: 80px
+      mode_bg_color: var(--mdc-text-field-fill-color)
+      mode_name_color: var(--disabled-text-color)
+      mode_style:
+        - border-radius: 35%
+        - margin-top: 10%
+        - width: '[[[ return variables.mode_size ]]]'
+        - height: '[[[ return variables.mode_size ]]]'
+        - color: |
+            [[[             
+              if (states['switch.water_heater_power'].state == 'off')
+                return variables.mode_name_color;
+            ]]]
+        - background: |
+            [[[ 
+              if (states['switch.water_heater_power'].state == 'off')
+                return variables.mode_bg_color;
+            ]]]
+      mode_focused_style:
+        - '-webkit-box-shadow': inset 0px 0px 5px 0px var(--button-card-light-color)
     styles:
       icon:
         - padding-bottom: 20px
@@ -41,10 +62,10 @@ cards:
         - align-self: stretch
       grid:
         - grid-template-areas: >-
-            "head head head head" "n n n i" "temp temp temp1 temp1" "temp temp
-            temp2 temp2" "target_name target_name target_name target_name"
-            "target target target power" "max eco bps nn"
-        - grid-template-columns: 1fr 1fr 1fr 1fr
+            "head head head" "n n i" "temp temp temp1" "temp temp temp2"
+            "target_name target_name target_name" "target target power" "max eco
+            bps"
+        - grid-template-columns: 1fr 1fr 1fr
         - grid-template-rows: >-
             min-content min-content min-content min-content min-content
             min-content min-content
@@ -60,12 +81,12 @@ cards:
           - justify-self: start
           - font-size: 28px
         temp1:
-          - padding-left: 90px
+          - padding-left: 30px
           - align-self: middle
           - justify-self: middle
           - font-size: 14px
         temp2:
-          - padding-left: 90px
+          - padding-left: 30px
           - align-self: middle
           - justify-self: middle
           - font-size: 14px
@@ -73,19 +94,16 @@ cards:
           - padding-top: 20px
           - padding-left: 15px
           - justify-self: left
+          - color: gray
         power:
-          - padding-top: 15px
           - padding-right: 20px
           - justify-self: right
         max:
-          - height: 80px
-          - width: 80px
+          - justify-self: center
         eco:
-          - height: 80px
-          - width: 80px
+          - justify-self: center
         bps:
-          - height: 80px
-          - width: 80px
+          - justify-self: center
     custom_fields:
       head: Water Heater
       temp: |
@@ -142,26 +160,17 @@ cards:
             - value: max
               color: red
               styles:
-                card:
-                  - '-webkit-box-shadow': inset 0px 0px 5px 0px var(--button-card-light-color)
+                card: '[[[ return variables.mode_focused_style ]]]'
           tap_action:
             action: |
               [[[ 
                 if (states['switch.water_heater_power'].state == 'off')
                   return 'none'
+                else
+                  return 'call-service'
+              ]]]
           styles:
-            card:
-              - border-radius: 50%
-              - margin-top: 10%
-              - margin-left: 25%
-          card_mod:
-            style: |
-              {% if is_state('switch.water_heater_power', 'off') %}
-              ha-card {
-                color: var(--disabled-text-color);
-                --ha-card-background: var(--mdc-text-field-fill-color);
-                }
-              {% endif %}
+            card: '[[[ return variables.mode_style ]]]'
       eco:
         card:
           type: custom:button-card
@@ -176,8 +185,7 @@ cards:
             - value: eco
               color: green
               styles:
-                card:
-                  - '-webkit-box-shadow': inset 0px 0px 5px 0px var(--button-card-light-color)
+                card: '[[[ return variables.mode_focused_style ]]]'
           tap_action:
             action: |
               [[[ 
@@ -190,19 +198,8 @@ cards:
             data:
               entity_id: select.water_heater_mode
               option: eco
-          card_mod:
-            style: |
-              {% if is_state('switch.water_heater_power', 'off') %}
-              ha-card {
-                color: var(--disabled-text-color);
-                --ha-card-background: var(--mdc-text-field-fill-color);
-                }
-              {% endif %}
           styles:
-            card:
-              - border-radius: 50%
-              - margin-top: 10%
-              - margin-left: 25%
+            card: '[[[ return variables.mode_style ]]]'
       bps:
         card:
           type: custom:button-card
@@ -217,8 +214,7 @@ cards:
             - value: bps
               color: blue
               styles:
-                card:
-                  - '-webkit-box-shadow': inset 0px 0px 5px 0px var(--button-card-light-color)
+                card: '[[[ return variables.mode_focused_style ]]]'
           tap_action:
             action: |
               [[[ 
@@ -231,17 +227,6 @@ cards:
             data:
               entity_id: select.water_heater_mode
               option: bps
-          card_mod:
-            style: |
-              {% if is_state('switch.water_heater_power', 'off') %}
-              ha-card {
-                color: var(--disabled-text-color);
-                --ha-card-background: var(--mdc-text-field-fill-color);
-                }
-              {% endif %}
           styles:
-            card:
-              - border-radius: 50%
-              - margin-top: 10%
-              - margin-left: 25%
+            card: '[[[ return variables.mode_style ]]]'
 columns: 1
