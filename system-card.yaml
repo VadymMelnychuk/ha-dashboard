@@ -6,7 +6,7 @@ cards:
   - type: custom:button-card
     entity: sensor.processor_temperature
     icon: mdi:raspberry-pi
-    entity_picture: /local/images/RasPi4ModelB.svg
+    entity_picture: /local/community/images/RasPi4ModelB.svg
     show_entity_picture: true
     name: ' '
     styles:
@@ -179,7 +179,7 @@ cards:
             action: call-service
             service: homeassistant.restart
   - type: entities
-    title: Currency Rates
+    title: Financial Rates
     entities:
       - entity: sensor.usd_nbu
         unit: false
@@ -190,6 +190,8 @@ cards:
         entities:
           - entity: sensor.usd_market
             name: false
+            tap_action:
+              action: more-info
       - entity: sensor.eur_nbu
         unit: false
         type: custom:multiple-entity-row
@@ -199,12 +201,21 @@ cards:
         entities:
           - entity: sensor.eur_market
             name: false
-  - type: entities
-    entities:
       - entity: sensor.dkng
-    title: Shares
+  - chart_type: line
+    period: day
+    type: statistics-graph
+    entities:
+      - sensor.usd_nbu
+      - sensor.usd_market
+      - sensor.eur_nbu
+      - sensor.eur_market
+    days_to_show: 30
+    stat_types:
+      - state
+    title: Rates
   - type: gauge
-    entity: sensor.rt_ax88u_7658_kib_s_received
+    entity: sensor.rt_ax88u_7658_download_speed
     name: Download speed
     unit: KiB/s
     min: 0
