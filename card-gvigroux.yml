@@ -1,0 +1,381 @@
+# Water Heater card for the gvigroux/hon integration (water-heater branch).
+#
+# Unlike the mmalolepszy build, gvigroux exposes a single `water_heater.water_heater`
+# entity that drives on/off, target temperature and operation mode. There is no
+# switch.*_power, number.*_target_temperature or select.*_mode helper, so this card
+# talks to the water_heater entity directly:
+#   - on/off          -> tap_action: toggle               (water_heater.water_heater)
+#   - target temp     -> water_heater.set_temperature     (slider-entity-row)
+#   - operation mode  -> water_heater.set_operation_mode  (eco / max / bps)
+#
+# Requirements (HACS): button-card, slider-entity-row.
+# Note: the target slider uses slider-entity-row against the water_heater entity.
+#       If your slider-entity-row version doesn't render water_heater, replace the
+#       `target:` block with a thermostat/number helper (see comment there).
+type: custom:button-card
+entity: sensor.water_heater_temperature
+name: Temperature
+variables:
+  mode_size: 80px
+  mode_bg_color: var(--mdc-text-field-fill-color)
+  mode_name_color: var(--disabled-text-color)
+  mode_style:
+    - border-radius: 35%
+    - margin-top: 10%
+    - width: "[[[ return variables.mode_size ]]]"
+    - height: "[[[ return variables.mode_size ]]]"
+    - color: |
+        [[[
+          if (states['water_heater.water_heater'].state == 'off')
+            return variables.mode_name_color;
+        ]]]
+    - background: |
+        [[[
+          if (states['water_heater.water_heater'].state == 'off')
+            return variables.mode_bg_color;
+        ]]]
+  mode_focused_style:
+    - "-webkit-box-shadow": inset 0px 0px 5px 0px var(--button-card-light-color)
+styles:
+  icon:
+    - padding-bottom: 20px
+    - color: |
+        [[[
+          const target = states['water_heater.water_heater'].attributes.temperature;
+          const perc = (entity.state / target) * 100;
+          if (perc >= 90)
+            return '#ff0000';
+          if (perc >= 80)
+            return '#ff8800';
+          if (perc >= 70)
+            return '#ffff00';
+          if (perc >= 60)
+            return '#88ff00';
+          if (perc >= 50)
+            return '#00ff00';
+          if (perc >= 40)
+            return '#00ff88';
+          if (perc >= 30)
+            return '#00ffff';
+          if (perc >= 20)
+            return '#0088ff';
+          if (perc >= 10)
+            return '#0000ff';
+        ]]]
+    - height: 40px
+    - width: 40px
+  name:
+    - font-size: 17px
+    - color: gray
+    - padding-top: 5px
+    - padding-left: 15px
+    - justify-self: left
+    - align-self: stretch
+  grid:
+    - grid-template-areas: >-
+        "head head head" "n n i" "temp temp temp1" "temp temp temp2"
+        "target_name target_name target_name" "target target power" "max eco
+        bps" "heating remaining wattage"
+    - grid-template-columns: 1fr 1fr 1fr
+    - grid-template-rows: >-
+        min-content min-content min-content min-content min-content min-content
+        min-content min-content
+  custom_fields:
+    head:
+      - justify-self: start
+      - font-size: 28px
+      - font-weight: bolder
+      - padding-left: 15px
+    temp:
+      - padding-left: 15px
+      - align-self: middle
+      - justify-self: start
+      - font-size: 28px
+    temp1:
+      - padding-left: 30px
+      - align-self: middle
+      - justify-self: middle
+      - font-size: 14px
+    temp2:
+      - padding-left: 30px
+      - align-self: middle
+      - justify-self: middle
+      - font-size: 14px
+    target_name:
+      - padding-top: 20px
+      - padding-left: 15px
+      - justify-self: left
+      - color: gray
+    power:
+      - padding-right: 20px
+      - justify-self: right
+    max:
+      - justify-self: center
+    eco:
+      - justify-self: center
+    bps:
+      - justify-self: center
+    heating:
+      - justify-self: center
+      - padding-top: 10px
+    remaining:
+      - justify-self: center
+      - padding-top: 10px
+    wattage:
+      - justify-self: center
+      - padding-top: 10px
+custom_fields:
+  head: Water Heater
+  temp: |
+    [[[
+      return `<span>${entity.state}<span style='font-size: 18px; color: gray'> °C</span></span>`
+    ]]]
+  temp1:
+    card:
+      type: custom:button-card
+      entity: sensor.water_heater_temperature_zone_1
+      show_icon: false
+      name: |
+        [[[
+          return `<span style='font-size: 12px;'>Temp 1:</span> ` +
+            `<span style='font-weight: bold'>` +
+            `${states['sensor.water_heater_temperature_zone_1'].state}` +
+            `<span style='font-size: 10px; color: gray'> °C</span></span>`
+        ]]]
+      styles:
+        card:
+          - font-size: 14px
+          - border: |
+              [[[
+                 return '0px'
+              ]]]
+  temp2:
+    card:
+      type: custom:button-card
+      entity: sensor.water_heater_temperature_zone_2
+      show_icon: false
+      name: |
+        [[[
+          return `<span style='font-size: 12px;'>Temp 2:</span> ` +
+            `<span style='font-weight: bold'>` +
+            `${states['sensor.water_heater_temperature_zone_2'].state}` +
+            `<span style='font-size: 10px; color: gray'> °C</span></span>`
+        ]]]
+      styles:
+        card:
+          - font-size: 14px
+          - border: |
+              [[[
+                 return '0px'
+              ]]]
+  target_name: Target Temperature
+  target:
+    # Drives water_heater.set_temperature. If slider-entity-row doesn't support
+    # the water_heater domain in your install, swap this for a thermostat card:
+    #   card: { type: thermostat, entity: water_heater.water_heater }
+    card:
+      type: custom:slider-entity-row
+      entity: water_heater.water_heater
+      min: 30
+      max: 85
+      step: 1
+      full_row: true
+  power:
+    card:
+      type: custom:button-card
+      entity: water_heater.water_heater
+      show_name: false
+      icon: mdi:power
+      color_type: icon
+      color: var(--disabled-text-color)
+      state:
+        # OFF: greyed out, grey glow
+        - value: "off"
+          color: var(--disabled-text-color)
+          styles:
+            card:
+              - "-webkit-box-shadow": 0px 0px 6px 1px #bdbdbd
+              - box-shadow: 0px 0px 6px 1px #bdbdbd
+        # ON (eco / max / bps): green icon, light green glow
+        - operator: "!="
+          value: "off"
+          color: green
+          styles:
+            icon:
+              - color: green
+            card:
+              - "-webkit-box-shadow": 0px 0px 6px 1px #a5d6a7
+              - box-shadow: 0px 0px 6px 1px #a5d6a7
+      tap_action:
+        action: toggle
+      styles:
+        icon:
+          - width: 80%
+        card:
+          - width: 30px
+          - height: 30px
+  max:
+    card:
+      type: custom:button-card
+      entity: water_heater.water_heater
+      show_name: true
+      color_type: icon
+      color: gray
+      icon: mdi:fire
+      icon_height: 35px
+      name: Max
+      state:
+        - operator: template
+          value: "[[[ return states['water_heater.water_heater'].attributes.operation_mode === 'max' ]]]"
+          color: red
+          styles:
+            card: "[[[ return variables.mode_focused_style ]]]"
+      tap_action:
+        action: |
+          [[[
+            if (states['water_heater.water_heater'].state === 'off')
+              return 'none'
+            else
+              return 'call-service'
+          ]]]
+        service: water_heater.set_operation_mode
+        data:
+          entity_id: water_heater.water_heater
+          operation_mode: max
+      styles:
+        card: "[[[ return variables.mode_style ]]]"
+  eco:
+    card:
+      type: custom:button-card
+      entity: water_heater.water_heater
+      show_name: true
+      color_type: icon
+      color: gray
+      icon: mdi:leaf
+      icon_height: 35px
+      name: Eco
+      state:
+        - operator: template
+          value: "[[[ return states['water_heater.water_heater'].attributes.operation_mode === 'eco' ]]]"
+          color: green
+          styles:
+            card: "[[[ return variables.mode_focused_style ]]]"
+      tap_action:
+        action: |
+          [[[
+            if (states['water_heater.water_heater'].state === 'off')
+              return 'none'
+            else
+              return 'call-service'
+          ]]]
+        service: water_heater.set_operation_mode
+        data:
+          entity_id: water_heater.water_heater
+          operation_mode: eco
+      styles:
+        card: "[[[ return variables.mode_style ]]]"
+  bps:
+    card:
+      type: custom:button-card
+      entity: water_heater.water_heater
+      show_name: true
+      color_type: icon
+      color: gray
+      icon: mdi:hospital-box
+      icon_height: 35px
+      name: BPS
+      state:
+        - operator: template
+          value: "[[[ return states['water_heater.water_heater'].attributes.operation_mode === 'bps' ]]]"
+          color: blue
+          styles:
+            card: "[[[ return variables.mode_focused_style ]]]"
+      tap_action:
+        action: |
+          [[[
+            if (states['water_heater.water_heater'].state === 'off')
+              return 'none'
+            else
+              return 'call-service'
+          ]]]
+        service: water_heater.set_operation_mode
+        data:
+          entity_id: water_heater.water_heater
+          operation_mode: bps
+      styles:
+        card: "[[[ return variables.mode_style ]]]"
+  heating:
+    card:
+      type: custom:button-card
+      entity: binary_sensor.water_heater_heating
+      name: Heating
+      icon: mdi:fire
+      show_state: true
+      color_type: icon
+      color: var(--disabled-text-color)
+      state:
+        - value: "on"
+          color: "#ff5722"
+      tap_action:
+        action: more-info
+      styles:
+        card:
+          - border: none
+          - box-shadow: none
+          - padding: 4px
+        icon:
+          - width: 24px
+          - height: 24px
+        name:
+          - font-size: 11px
+          - color: gray
+        state:
+          - font-size: 12px
+  remaining:
+    card:
+      type: custom:button-card
+      entity: sensor.water_heater_remaining_hot_water
+      name: Hot water
+      icon: mdi:water-thermometer
+      show_state: true
+      color_type: icon
+      color: "#03a9f4"
+      tap_action:
+        action: more-info
+      styles:
+        card:
+          - border: none
+          - box-shadow: none
+          - padding: 4px
+        icon:
+          - width: 24px
+          - height: 24px
+        name:
+          - font-size: 11px
+          - color: gray
+        state:
+          - font-size: 12px
+  wattage:
+    card:
+      type: custom:button-card
+      entity: sensor.boiler_power
+      name: Power
+      icon: mdi:lightning-bolt
+      show_state: true
+      color_type: icon
+      color: "#ffc107"
+      tap_action:
+        action: more-info
+      styles:
+        card:
+          - border: none
+          - box-shadow: none
+          - padding: 4px
+        icon:
+          - width: 24px
+          - height: 24px
+        name:
+          - font-size: 11px
+          - color: gray
+        state:
+          - font-size: 12px
