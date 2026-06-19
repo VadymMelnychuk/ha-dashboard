@@ -226,7 +226,7 @@ custom_fields:
       name: Max
       state:
         - operator: template
-          value: "[[[ return states['water_heater.water_heater'].attributes.operation_mode === 'max' ]]]"
+          value: "[[[ return states['water_heater.water_heater'].attributes.operation_mode === 'Max' ]]]"
           color: red
           styles:
             card: "[[[ return variables.mode_focused_style ]]]"
@@ -241,7 +241,7 @@ custom_fields:
         service: water_heater.set_operation_mode
         data:
           entity_id: water_heater.water_heater
-          operation_mode: max
+          operation_mode: Max
       styles:
         card: "[[[ return variables.mode_style ]]]"
   eco:
@@ -256,7 +256,7 @@ custom_fields:
       name: Eco
       state:
         - operator: template
-          value: "[[[ return states['water_heater.water_heater'].attributes.operation_mode === 'eco' ]]]"
+          value: "[[[ return states['water_heater.water_heater'].attributes.operation_mode === 'Eco' ]]]"
           color: green
           styles:
             card: "[[[ return variables.mode_focused_style ]]]"
@@ -271,7 +271,7 @@ custom_fields:
         service: water_heater.set_operation_mode
         data:
           entity_id: water_heater.water_heater
-          operation_mode: eco
+          operation_mode: Eco
       styles:
         card: "[[[ return variables.mode_style ]]]"
   bps:
@@ -286,7 +286,7 @@ custom_fields:
       name: BPS
       state:
         - operator: template
-          value: "[[[ return states['water_heater.water_heater'].attributes.operation_mode === 'bps' ]]]"
+          value: "[[[ return states['water_heater.water_heater'].attributes.operation_mode === 'BPS' ]]]"
           color: blue
           styles:
             card: "[[[ return variables.mode_focused_style ]]]"
@@ -301,7 +301,7 @@ custom_fields:
         service: water_heater.set_operation_mode
         data:
           entity_id: water_heater.water_heater
-          operation_mode: bps
+          operation_mode: BPS
       styles:
         card: "[[[ return variables.mode_style ]]]"
   heating:
